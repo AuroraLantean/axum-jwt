@@ -11,12 +11,12 @@ https://slumber.lucaspickering.me/
 See the slumber.yml file in the root directory...
 For JWT tokens, use:
 ```
-  #slumber request -p local secret_view3 | jq
-  secret_view3: !request
+  #slumber request -p local secret_view | jq
+  secret_view: !request
     method: GET
     url: "{{host}}/secret-view"
     authentication:
-      !bearer "{{chains.auth_token3}}"
+      !bearer "{{chains.auth_token}}"
 ```
 
 Run Slumber commands:
