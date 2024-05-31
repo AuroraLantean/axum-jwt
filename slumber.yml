@@ -1,0 +1,61 @@
+# slumber.yml
+#https://slumber.lucaspickering.me/book/api/request_collection/profile.html
+
+profiles:
+  local:
+    name: Local
+    data:
+      host: http://localhost:2323
+  production:
+    name: production
+    data:
+      host: https://myserver.com
+
+
+chains:
+  username:
+    source: !file
+      path: ./creds.json
+    selector: $.user
+  password:
+    source: !file
+      path: ./creds.json
+    selector: $.pw
+  email:
+    source: !file
+      path: ./creds.json
+    selector: $.email
+  auth_token:
+    source: !request
+      recipe: get_token
+    selector: $['data']['token']
+    #selector: $.data.token
+
+requests:
+  # slumber request -p local root
+  root: !request
+    method: GET
+    url: "{{host}}/"
+  
+  #slumber request -p local public_view | jq
+  public_view: !request
+    method: GET
+    url: "{{host}}/public-view"
+    
+  get_token: !request
+    headers:
+      content-type: application/json
+    method: POST
+    url: "{{host}}/get-token"
+    body: |
+      {"email": "{{chains.email}}"}
+
+  #slumber request -p local secret_view | jq
+  secret_view: !request
+    method: GET
+    url: "{{host}}/secret-view"
+    query:
+      auth: "{{chains.auth_token}}"
+
+    #authentication:
+    #  token !bearer 4J2e0TYqKA3gFllfTu17OF7n8g1CeAxZyi/MK5g40/o=
