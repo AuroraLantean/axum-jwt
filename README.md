@@ -8,7 +8,16 @@ cargo run --bin axum-auth
 Install Slumber:
 https://slumber.lucaspickering.me/
 
-See the slumber.yml file in the main directory...
+See the slumber.yml file in the root directory...
+For JWT tokens, use:
+```
+  #slumber request -p local secret_view3 | jq
+  secret_view3: !request
+    method: GET
+    url: "{{host}}/secret-view"
+    authentication:
+      !bearer "{{chains.auth_token3}}"
+```
 
 Run Slumber commands:
 `$ slumber` then use the UI to run APIs
@@ -27,8 +36,8 @@ $ slumber request -p local get_token | jq
 $ slumber request -p local secret_view | jq
 {
   "data": {
-    "message": "No token provided"
+    "email": "johndoe@gmail.com"
   },
-  "success": false
+  "success": true
 }
 ```

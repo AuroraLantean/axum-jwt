@@ -28,9 +28,20 @@ chains:
   auth_token:
     source: !request
       recipe: get_token
-    selector: $['data']['token']
-    #selector: $.data.token
-
+    selector: $.data.token
+    #selector: $['data']['token']
+  auth_token_raw:
+    source: !request
+      recipe: get_token
+  auth_token2:
+    source: !command
+      command: [ "jq", ".data", ".token" ]
+      stdin: "{{chains.auth_token_raw}}"
+  auth_token3:
+    source: !prompt
+      message: Enter Token
+    sensitive: true
+  
 requests:
   # slumber request -p local root
   root: !request
@@ -54,8 +65,20 @@ requests:
   secret_view: !request
     method: GET
     url: "{{host}}/secret-view"
-    query:
-      auth: "{{chains.auth_token}}"
+    authentication:
+      !bearer "{{chains.auth_token}}"
 
-    #authentication:
-    #  token !bearer 4J2e0TYqKA3gFllfTu17OF7n8g1CeAxZyi/MK5g40/o=
+  #slumber request -p local secret_view2 | jq
+  secret_view2: !request
+    method: GET
+    url: "{{host}}/secret-view"
+    query:
+      auth: "{{chains.auth_token2}}"
+
+  #slumber request -p local secret_view3 | jq
+  secret_view3: !request
+    method: GET
+    url: "{{host}}/secret-view"
+    authentication:
+      !bearer "{{chains.auth_token3}}"
+
