@@ -16,23 +16,20 @@ chains:
   username:
     source: !file
       path: ./creds.json
-    selector: $.user
+    selector: $.username
   password:
     source: !file
       path: ./creds.json
-    selector: $.pw
+    selector: $.password
   email:
     source: !file
       path: ./creds.json
     selector: $.email
   auth_token:
     source: !request
-      recipe: get_token
+      recipe: login
     selector: $.data.token
     #selector: $['data']['token']
-  auth_token_raw:
-    source: !request
-      recipe: get_token
   auth_token2:
     source: !command
       command: [ "jq", ".data", ".token" ]
@@ -53,13 +50,16 @@ requests:
     method: GET
     url: "{{host}}/public-view"
     
-  get_token: !request
+  login: !request
     headers:
       content-type: application/json
     method: POST
-    url: "{{host}}/get-token"
+    url: "{{host}}/login"
     body: |
-      {"email": "{{chains.email}}"}
+      {
+        "email": "{{chains.email}}",
+        "password": "{{chains.password}}"
+      }
 
   #slumber request -p local secret_view | jq
   secret_view: !request

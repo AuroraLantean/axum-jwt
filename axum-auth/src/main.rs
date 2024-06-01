@@ -15,7 +15,7 @@ use tokio::net::TcpListener;
 async fn main() {
   let routes = Router::new()
     .route("/public-view", get(public_view_handler))
-    .route("/get-token", post(get_token_handler))
+    .route("/login", post(login_handler))
     .route("/secret-view", get(secret_view_handler));
   //.route("/xyz", get(|| async {"XYZ View"}));
 
@@ -45,7 +45,7 @@ async fn public_view_handler() -> Response<String> {
     .unwrap_or_default()
 }
 
-async fn get_token_handler(Json(user): Json<User>) -> Response<String> {
+async fn login_handler(Json(user): Json<User>) -> Response<String> {
   let token = jwt_lib::get_jwt(user);
 
   match token {
@@ -86,7 +86,7 @@ async fn secret_view_handler(Auth(user): Auth) -> Response<String> {
     .body(
       json!({
         "success": true,
-        "data": user
+        "data": user.email
       })
       .to_string(),
     )
@@ -102,6 +102,8 @@ where
 {
   type Rejection = Response<String>;
 
+  // header: { Authorization: "Bearer tokenXYZ"}
+  //https://docs.rs/axum/latest/axum/extract/trait.FromRequestParts.html#associatedtype.Rejection: Extractors that implement FromRequestParts cannot consume the request body 
   async fn from_request_parts(parts: &mut Parts, _: &S) -> Result<Self, Self::Rejection> {
     let access_token = parts
       .headers

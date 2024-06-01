@@ -1,5 +1,5 @@
 { 
-	"user": "johndoe", 
-	"pw": "crypto",
+	"username": "johndoe", 
+	"password": "crypto1234",
 	"email": "johndoe@gmail.com"
 }

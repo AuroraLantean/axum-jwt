@@ -4,12 +4,16 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Deserialize, Serialize)]
 pub struct User {
-  email: String,
+  pub email: String,
+  password: String,
 }
 
+//https://crates.io/crates/jsonwebtoken
+//Copy fields from User struct because we need to deserialize it
 #[derive(Serialize, Deserialize)]
 struct Claims {
   email: String,
+  password: String,
   exp: i64,
 }
 
@@ -17,10 +21,15 @@ struct Claims {
 // https://crates.io/crates/jsonwebtoken
 // HS256, HS384, or HS512: same key to encode and decode; RSA: private key to encode, and public key to decode
 pub fn get_jwt(user: User) -> Result<String, String> {
+  //TODO: check with db if the user password is correct
+  
+  // generate jwt from jsonwebtoken crate
+  // https://crates.io/crates/jsonwebtoken
   let token = encode(
     &Header::default(),
     &Claims {
       email: user.email,
+      password: user.password,
       exp: (Utc::now() + Duration::minutes(1)).timestamp(),//expires after 1 min
     },
     &EncodingKey::from_secret("mykey".as_bytes()),
@@ -36,7 +45,7 @@ pub fn decode_jwt(token: &str) -> Result<User, String> {
     token,
     &DecodingKey::from_secret("mykey".as_bytes()),
     &Validation::default(),
-  );
+  );//default leeway is 60 secs, can be changed at validation options: https://docs.rs/jsonwebtoken/9.3.0/jsonwebtoken/struct.Validation.html
 
   match token_data {
     Ok(token_data) => Ok(token_data.claims),
